@@ -1,0 +1,27 @@
+name: Website deployment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Get .NET 7
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x'
+      
+    - name: Run
+      run: dotnet run -c release   
+      
+    - uses: JamesIves/github-pages-deploy-action@4.1.4
+      name: Publish on Github Pages
+      with:
+        branch: gh-pages
+        folder: ./output

@@ -3,7 +3,7 @@ using Plotly.NET.CSharp;
 
 // Super parameters
 const int AGENT_COUNT = 1000;
-const double AVG = 0.02;
+const double AVG = 0.015;
 const double STD = 1.0;
 const double INITIAL_CASH = 10000.0;
 const int INITIAL_ASSETS = 100;
@@ -42,9 +42,11 @@ for (int i = 0; i < STEP_COUNT; i++)
     prices.Add(price);
 }
 
-Chart.Line<int, double, string>(Enumerable.Range(0, prices.Count), prices)
-.WithSize(Width: 1400)
-.SaveHtml($"./output/graph-{paramID}.html", true);
+var chart = Chart.Line<int, double, string>(Enumerable.Range(0, prices.Count), prices)
+.WithSize(Width: 1400);
+
+chart.SaveHtml($"./output/graph-{paramID}.html", false);
+chart.SaveHtml($"./output/last-graph.html", true);
 
 static double ClearingPrice(Order[] orders, double min, double max, int maxIter = 30)
 {
