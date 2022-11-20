@@ -3,11 +3,11 @@ using Plotly.NET.CSharp;
 
 // Super parameters
 const int AGENT_COUNT = 1000;
-const double AVG = 0.011;
+const double AVG = 0.03;
 const double STD = 1.0;
 const double INITIAL_CASH = 10000.0;
 const int INITIAL_ASSETS = 100;
-const int STEP_COUNT = 100000;
+const int STEP_COUNT = 300000;
 const double INITIAL_PRICE = INITIAL_CASH / INITIAL_ASSETS;
 
 var paramID = $"agCount{AGENT_COUNT}-avg{AVG:F3}-std{STD:F3}-initCash{INITIAL_CASH:F3}-initAss{INITIAL_ASSETS}-stepCount{STEP_COUNT}-initPrice{INITIAL_PRICE:F3}";
@@ -39,7 +39,8 @@ for (int i = 0; i < STEP_COUNT; i++)
         Console.Write(i.ToString().PadLeft(7, '0'));
         Console.WriteLine($": {price:F3}");
     }
-    prices.Add(price);
+    if (i % 10 is 0)
+        prices.Add(price);
 }
 
 var chart = Chart.Line<int, double, string>(Enumerable.Range(0, prices.Count), prices)
