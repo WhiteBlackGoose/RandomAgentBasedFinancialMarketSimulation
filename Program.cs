@@ -3,7 +3,7 @@ using Plotly.NET.CSharp;
 
 // Super parameters
 const int AGENT_COUNT = 1000;
-const double AVG = 0.015;
+const double AVG = 0.011;
 const double STD = 1.0;
 const double INITIAL_CASH = 10000.0;
 const int INITIAL_ASSETS = 100;
