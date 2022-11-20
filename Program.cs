@@ -45,6 +45,7 @@ for (int i = 0; i < STEP_COUNT; i++)
 var chart = Chart.Line<int, double, string>(Enumerable.Range(0, prices.Count), prices)
 .WithSize(Width: 1400);
 
+Directory.CreateDirectory("output");
 chart.SaveHtml($"./output/graph-{paramID}.html", false);
 chart.SaveHtml($"./output/last-graph.html", true);
 
