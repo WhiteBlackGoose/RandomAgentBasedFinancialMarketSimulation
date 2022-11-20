@@ -39,7 +39,7 @@ for (int i = 0; i < STEP_COUNT; i++)
         Console.Write(i.ToString().PadLeft(7, '0'));
         Console.WriteLine($": {price:F3}");
     }
-    if (i % 10 is 0)
+    if (i % 1 is 0)
         prices.Add(price);
 }
 
