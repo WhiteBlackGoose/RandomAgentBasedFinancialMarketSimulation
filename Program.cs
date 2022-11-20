@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using Microsoft.FSharp.Core;
 using Plotly.NET.CSharp;
 
 // Super parameters
@@ -24,27 +25,54 @@ for (int i = 0; i < agents.Length; i++)
 
 var price = INITIAL_PRICE;
 var prices = new List<double>();
+var cashVolume = new List<double>();
+var involvedAgentsCount = new List<int>();
 
 for (int i = 0; i < STEP_COUNT; i++)
 {
     var orders = agents.Select(a => a.GetOrder(rand, AVG, STD, price)).ToArray();
-    price = Math.Max(ClearingPrice(orders, 0f, 3 * price), 0.01);
+    price = ClearingPrice(orders, 0f, 3 * price);
+    var involvedAgents = 0;
+    var volume = 0.0;
     foreach (var order in orders)
         if (order.OrderType is OrderType.Buy && price <= order.LimitPrice)
-            ExecOrder(order, price);
+        {
+            volume += ExecOrder(order, price);
+            involvedAgents++;
+        }
         else if (order.OrderType is OrderType.Sell && price >= order.LimitPrice)
-            ExecOrder(order, price);
+        {
+            volume += ExecOrder(order, price);
+            involvedAgents++;
+        }
     if (i % 1000 is 0)
     {
         Console.Write(i.ToString().PadLeft(7, '0'));
         Console.WriteLine($": {price:F3}");
     }
-    if (i % 1 is 0)
-        prices.Add(price);
+    prices.Add(price);
+    cashVolume.Add(volume / 2);
+    involvedAgentsCount.Add(involvedAgents);
 }
 
-var chart = Chart.Line<int, double, string>(Enumerable.Range(0, prices.Count), prices)
-.WithSize(Width: 1400);
+var grid = new [] {
+    Chart.Line<int, double, string>(Enumerable.Range(0, prices.Count), prices, Name: "Price of stock in moment")
+    .WithSize(Width: 1400)
+    .WithYAxisStyle<int, int, int>(TitleText: "Price $"),
+
+    Chart.Line<int, double, string>(Enumerable.Range(0, cashVolume.Count), cashVolume, Name: "Total cashflow in moment")
+    .WithSize(Width: 1400)
+    .WithYAxisStyle<int, int, int>(TitleText: "Trade volume $"),
+
+    Chart.Line<int, int, string>(Enumerable.Range(0, involvedAgentsCount.Count), involvedAgentsCount, Name: "# of agents to trade")
+    .WithSize(Width: 1400)
+    .WithYAxisStyle<int, int, int>(TitleText: "# of involved agents"),
+    };
+
+var chart = 
+    Plotly.NET.Chart.SingleStack<Plotly.NET.GenericChart.GenericChart[]>(Pattern: FSharpOption<Plotly.NET.StyleParam.LayoutGridPattern>.Some(Plotly.NET.StyleParam.LayoutGridPattern.Coupled))
+    .Invoke(grid)
+    .WithSize(Height: 1000);
 
 Directory.CreateDirectory("output");
 chart.SaveHtml($"./output/graph-{paramID}.html", false);
@@ -79,7 +107,7 @@ static int Supply(Order[] orders, double price)
     return res;
 }
 
-static void ExecOrder(Order order, double price)
+static double ExecOrder(Order order, double price)
 {
     if (order.OrderType is OrderType.Buy)
     {
@@ -91,6 +119,7 @@ static void ExecOrder(Order order, double price)
         order.Agent.Cash += price * order.Quantity;
         order.Agent.Assets -= order.Quantity;
     }
+    return price * order.Quantity;
 }
 
 enum OrderType
